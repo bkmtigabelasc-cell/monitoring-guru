@@ -1,0 +1,762 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Monitoring Kehadiran Guru</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f6f9;
+      color: #263238;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-top: 30px;
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #607d8b;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cfd8dc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      background: #1976d2;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .info {
+      background: #f5f7f9;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: #607d8b;
+    }
+
+    .value {
+      font-weight: bold;
+      text-align: right;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .success {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- ========================= -->
+  <!-- HALAMAN LOGIN -->
+  <!-- ========================= -->
+
+  <div id="loginPage" class="container">
+
+    <div class="card">
+
+      <h1>Monitoring Kehadiran Guru</h1>
+
+      <div class="subtitle">
+        MTsN 13 Ciamis
+      </div>
+
+      <label>Username</label>
+
+      <input
+        type="text"
+        id="username"
+        placeholder="Masukkan username"
+      >
+
+      <label>Password</label>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Masukkan password"
+      >
+
+      <button onclick="login()">
+        LOGIN
+      </button>
+
+      <div id="loginMessage" class="message"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- HALAMAN MONITORING -->
+  <!-- ========================= -->
+
+  <div id="monitoringPage" class="container hidden">
+
+    <div class="card">
+
+      <h1>Monitoring Guru</h1>
+
+      <div class="subtitle">
+        MTsN 13 Ciamis
+      </div>
+
+      <div class="info">
+
+        <div class="info-row">
+          <span class="label">Nama Guru</span>
+          <span class="value" id="namaGuru">-</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Hari</span>
+          <span class="value" id="hari">-</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Tanggal</span>
+          <span class="value" id="tanggal">-</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Mata Pelajaran</span>
+          <span class="value" id="mapel">-</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Kelas</span>
+          <span class="value" id="kelas">-</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Jam</span>
+          <span class="value" id="jam">-</span>
+        </div>
+
+      </div>
+
+      <div id="monitoringMessage" class="message"></div>
+
+      <button
+        id="btnKonfirmasi"
+        onclick="konfirmasiMengajar()"
+        class="hidden"
+      >
+        KONFIRMASI MENGAJAR
+      </button>
+
+    </div>
+
+  </div>
+
+
+<script>
+
+/* =====================================
+   URL BACKEND
+   ===================================== */
+
+const API_URL = "https://script.google.com/macros/s/AKfycbwHoJW0x5FCNKei3hKzW94z8Ie-FH5589KAy_ttWp1BAki-QXaxTAjX1I1qjOGBILDi/exec";
+
+
+/* =====================================
+   DATA GURU YANG LOGIN
+   ===================================== */
+
+let guruLogin = {
+  idGuru: "",
+  namaGuru: "",
+  role: ""
+};
+
+
+/* =====================================
+   LOGIN
+   ===================================== */
+
+function login() {
+
+  const username =
+    document.getElementById("username").value.trim();
+
+  const password =
+    document.getElementById("password").value.trim();
+
+  if (!username || !password) {
+
+    tampilkanPesan(
+      "loginMessage",
+      "Username dan password wajib diisi.",
+      "error"
+    );
+
+    return;
+  }
+
+  tampilkanPesan(
+    "loginMessage",
+    "Sedang memproses login...",
+    "success"
+  );
+
+  callAPI(
+    "login",
+    {
+      username: username,
+      password: password
+    },
+    function(data) {
+
+      console.log("HASIL LOGIN:", data);
+
+      if (!data || !data.success) {
+
+        tampilkanPesan(
+          "loginMessage",
+          data && data.message
+            ? data.message
+            : "Login gagal.",
+          "error"
+        );
+
+        return;
+      }
+
+      /* ================================
+         SIMPAN DATA GURU
+         ================================ */
+
+      guruLogin.idGuru =
+        data.akun.idGuru;
+
+      guruLogin.namaGuru =
+        data.akun.username;
+
+      guruLogin.role =
+        data.akun.role;
+
+
+      /* ================================
+         PINDAH KE HALAMAN MONITORING
+         ================================ */
+
+      document
+        .getElementById("loginPage")
+        .classList.add("hidden");
+
+      document
+        .getElementById("monitoringPage")
+        .classList.remove("hidden");
+
+
+      document
+        .getElementById("namaGuru")
+        .textContent =
+        guruLogin.namaGuru;
+
+
+      /* ================================
+         CARI JADWAL SAAT INI
+         ================================ */
+
+      loadJadwalSaatIni();
+
+    }
+  );
+}
+
+
+/* =====================================
+   CARI JADWAL SAAT INI
+   ===================================== */
+
+function loadJadwalSaatIni() {
+
+  tampilkanPesan(
+    "monitoringMessage",
+    "Mencari jadwal mengajar saat ini...",
+    "success"
+  );
+
+  callAPI(
+    "jadwalGuruSaatIni",
+    {
+      idGuru: guruLogin.idGuru
+    },
+    function(data) {
+
+      console.log(
+        "JADWAL SAAT INI:",
+        data
+      );
+
+      if (!data || !data.success) {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          data && data.message
+            ? data.message
+            : "Gagal mengambil jadwal.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      /* ==============================
+         TIDAK ADA JADWAL
+         ============================== */
+
+      if (!data.ditemukan) {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          "Saat ini tidak ada jadwal mengajar.",
+          "success"
+        );
+
+        document
+          .getElementById("btnKonfirmasi")
+          .classList.add("hidden");
+
+        return;
+      }
+
+
+      /* ==============================
+         ADA JADWAL
+         ============================== */
+
+      const jadwal =
+  data.jadwal[0];
+
+window.jadwalAktifId =
+  jadwal.idJadwal;
+
+
+      document
+        .getElementById("hari")
+        .textContent =
+        data.hariSekarang || "-";
+
+
+      document
+        .getElementById("tanggal")
+        .textContent =
+        new Date().toLocaleDateString(
+          "id-ID"
+        );
+
+
+      document
+        .getElementById("mapel")
+        .textContent =
+        jadwal.namaMapel || "-";
+
+
+      document
+        .getElementById("kelas")
+        .textContent =
+        jadwal.kelas || "-";
+
+
+      document
+        .getElementById("jam")
+        .textContent =
+        jadwal.waktu || "-";
+
+
+      /* ==============================
+         CEK MONITORING
+         ============================== */
+
+      cekStatusMonitoring(
+        jadwal.idJadwal
+      );
+
+    }
+  );
+}
+
+
+/* =====================================
+   CEK SUDAH KONFIRMASI ATAU BELUM
+   ===================================== */
+
+function cekStatusMonitoring(idJadwal) {
+
+  const tanggal =
+    new Date()
+      .toISOString()
+      .substring(0, 10);
+
+
+  callAPI(
+    "cekMonitoringMengajar",
+    {
+      idJadwal: idJadwal,
+      tanggal: tanggal
+    },
+    function(data) {
+
+      console.log(
+        "STATUS MONITORING:",
+        data
+      );
+
+
+      if (
+        data &&
+        data.sudahKonfirmasi
+      ) {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          "Jadwal ini sudah dikonfirmasi.",
+          "success"
+        );
+
+        document
+          .getElementById("btnKonfirmasi")
+          .classList.add("hidden");
+
+      } else {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          "Silakan lakukan konfirmasi mengajar.",
+          "success"
+        );
+
+        document
+          .getElementById("btnKonfirmasi")
+          .classList.remove("hidden");
+
+      }
+
+    }
+  );
+}
+
+
+/* =====================================
+   KONFIRMASI MENGAJAR
+   ===================================== */
+
+function konfirmasiMengajar() {
+
+  const idJadwal =
+    window.jadwalAktifId;
+
+
+  if (!idJadwal) {
+
+    tampilkanPesan(
+      "monitoringMessage",
+      "ID jadwal tidak ditemukan.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  const tombol =
+    document.getElementById(
+      "btnKonfirmasi"
+    );
+
+  tombol.disabled = true;
+
+  tombol.textContent =
+    "MENYIMPAN...";
+
+
+  callAPI(
+    "konfirmasiMengajar",
+    {
+      idGuru: guruLogin.idGuru,
+      idJadwal: idJadwal
+    },
+    function(data) {
+
+      console.log(
+        "HASIL KONFIRMASI:",
+        data
+      );
+
+
+      tombol.disabled = false;
+
+      tombol.textContent =
+        "KONFIRMASI MENGAJAR";
+
+
+      if (
+        !data ||
+        !data.success
+      ) {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          data && data.message
+            ? data.message
+            : "Konfirmasi gagal.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      tampilkanPesan(
+        "monitoringMessage",
+        "Konfirmasi berhasil. Status: " +
+        data.monitoring.status,
+        "success"
+      );
+
+
+      tombol.classList.add(
+        "hidden"
+      );
+
+    }
+  );
+}
+
+
+/* =====================================
+   API JSONP
+   ===================================== */
+
+function callAPI(
+  action,
+  params,
+  callback
+) {
+
+  const callbackName =
+    "callback_" +
+    Date.now() +
+    "_" +
+    Math.floor(
+      Math.random() * 10000
+    );
+
+
+  params =
+    params || {};
+
+
+  params.action =
+    action;
+
+  params.callback =
+    callbackName;
+
+
+  const query =
+    Object.keys(params)
+      .map(function(key) {
+
+        return (
+          encodeURIComponent(key) +
+          "=" +
+          encodeURIComponent(
+            params[key]
+          )
+        );
+
+      })
+      .join("&");
+
+
+  const script =
+    document.createElement(
+      "script"
+    );
+
+
+  window[callbackName] =
+    function(data) {
+
+      callback(data);
+
+      cleanup();
+
+    };
+
+
+  script.src =
+    API_URL +
+    "?" +
+    query;
+
+
+  script.onerror =
+    function() {
+
+      callback({
+        success: false,
+        message:
+          "Server tidak dapat dihubungi."
+      });
+
+      cleanup();
+
+    };
+
+
+  document
+    .body
+    .appendChild(script);
+
+
+  function cleanup() {
+
+    if (
+      script &&
+      script.parentNode
+    ) {
+
+      script.parentNode
+        .removeChild(script);
+
+    }
+
+    try {
+
+      delete window[
+        callbackName
+      ];
+
+    } catch (e) {}
+
+  }
+
+}
+
+
+/* =====================================
+   PESAN
+   ===================================== */
+
+function tampilkanPesan(
+  elementId,
+  message,
+  type
+) {
+
+  const element =
+    document.getElementById(
+      elementId
+    );
+
+
+  element.textContent =
+    message;
+
+
+  element.className =
+    "message " + type;
+
+
+  element.style.display =
+    "block";
+
+}
+
+</script>
+
+</body>
+</html>
+```
