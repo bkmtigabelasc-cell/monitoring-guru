@@ -454,29 +454,39 @@ window.jadwalAktifId =
         jadwal.waktu || "-";
 
 
-      /* ==============================
-         CEK MONITORING
-         ============================== */
-
-      cekStatusMonitoring(
-        jadwal.idJadwal
-      );
-
-    }
-  );
-}
-
-
-/* =====================================
+      /* =====================================
    CEK SUDAH KONFIRMASI ATAU BELUM
    ===================================== */
 
 function cekStatusMonitoring(idJadwal) {
 
+  // Tanggal lokal Indonesia
+  const sekarang = new Date();
+
+  const tahun =
+    sekarang.getFullYear();
+
+  const bulan =
+    String(
+      sekarang.getMonth() + 1
+    ).padStart(2, "0");
+
+  const tanggalHariIni =
+    String(
+      sekarang.getDate()
+    ).padStart(2, "0");
+
   const tanggal =
-    new Date()
-      .toISOString()
-      .substring(0, 10);
+    tahun + "-" +
+    bulan + "-" +
+    tanggalHariIni;
+
+
+  console.log(
+    "CEK MONITORING:",
+    idJadwal,
+    tanggal
+  );
 
 
   callAPI(
@@ -493,93 +503,7 @@ function cekStatusMonitoring(idJadwal) {
       );
 
 
-      if (
-        data &&
-        data.sudahKonfirmasi
-      ) {
-
-        tampilkanPesan(
-          "monitoringMessage",
-          "Jadwal ini sudah dikonfirmasi.",
-          "success"
-        );
-
-        document
-          .getElementById("btnKonfirmasi")
-          .classList.add("hidden");
-
-      } else {
-
-        tampilkanPesan(
-          "monitoringMessage",
-          "Silakan lakukan konfirmasi mengajar.",
-          "success"
-        );
-
-        document
-          .getElementById("btnKonfirmasi")
-          .classList.remove("hidden");
-
-      }
-
-    }
-  );
-}
-
-
-/* =====================================
-   KONFIRMASI MENGAJAR
-   ===================================== */
-
-function konfirmasiMengajar() {
-
-  const idJadwal =
-    window.jadwalAktifId;
-
-
-  if (!idJadwal) {
-
-    tampilkanPesan(
-      "monitoringMessage",
-      "ID jadwal tidak ditemukan.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  const tombol =
-    document.getElementById(
-      "btnKonfirmasi"
-    );
-
-  tombol.disabled = true;
-
-  tombol.textContent =
-    "MENYIMPAN...";
-
-
-  callAPI(
-    "konfirmasiMengajar",
-    {
-      idGuru: guruLogin.idGuru,
-      idJadwal: idJadwal
-    },
-    function(data) {
-
-      console.log(
-        "HASIL KONFIRMASI:",
-        data
-      );
-
-
-      tombol.disabled = false;
-
-      tombol.textContent =
-        "KONFIRMASI MENGAJAR";
-
-
+      // Jika server gagal
       if (
         !data ||
         !data.success
@@ -589,30 +513,70 @@ function konfirmasiMengajar() {
           "monitoringMessage",
           data && data.message
             ? data.message
-            : "Konfirmasi gagal.",
+            : "Gagal mengecek status monitoring.",
           "error"
         );
+
+        document
+          .getElementById("btnKonfirmasi")
+          .classList.add("hidden");
 
         return;
       }
 
 
+      // ==============================
+      // SUDAH KONFIRMASI
+      // ==============================
+
+      if (
+        data.sudahKonfirmasi
+      ) {
+
+        const monitoring =
+          data.monitoring;
+
+
+        tampilkanPesan(
+          "monitoringMessage",
+          "Jadwal ini sudah dikonfirmasi.",
+          "success"
+        );
+
+
+        document
+          .getElementById("btnKonfirmasi")
+          .classList.add("hidden");
+
+
+        console.log(
+          "MONITORING SUDAH ADA:",
+          monitoring
+        );
+
+
+        return;
+      }
+
+
+      // ==============================
+      // BELUM KONFIRMASI
+      // ==============================
+
       tampilkanPesan(
         "monitoringMessage",
-        "Konfirmasi berhasil. Status: " +
-        data.monitoring.status,
+        "Silakan lakukan konfirmasi mengajar.",
         "success"
       );
 
 
-      tombol.classList.add(
-        "hidden"
-      );
+      document
+        .getElementById("btnKonfirmasi")
+        .classList.remove("hidden");
 
     }
   );
 }
-
 
 /* =====================================
    API JSONP
