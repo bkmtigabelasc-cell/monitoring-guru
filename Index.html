@@ -449,17 +449,27 @@ window.jadwalAktifId =
 
 
       document
-        .getElementById("jam")
-        .textContent =
-        jadwal.waktu || "-";
+  .getElementById("jam")
+  .textContent =
+  jadwal.waktu || "-";
 
 
-      /* =====================================
+/* =====================================
+   CEK SUDAH KONFIRMASI ATAU BELUM
+   ===================================== */
+
+cekStatusMonitoring(jadwal.idJadwal);
+
+    }
+  );
+}
+
+
+/* =====================================
    CEK SUDAH KONFIRMASI ATAU BELUM
    ===================================== */
 
 function cekStatusMonitoring(idJadwal) {
-
   // Tanggal lokal Indonesia
   const sekarang = new Date();
 
