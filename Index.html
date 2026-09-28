@@ -173,7 +173,6 @@
 
   </div>
 
-}
   <!-- ========================= -->
   <!-- HALAMAN MONITORING -->
   <!-- ========================= -->
@@ -461,18 +460,8 @@ window.jadwalAktifId =
    CEK SUDAH KONFIRMASI ATAU BELUM
    ===================================== */
 
-cekStatusMonitoring(jadwal.idJadwal);
-
-    }
-  );
-}
-
-
-/* =====================================
-   CEK SUDAH KONFIRMASI ATAU BELUM
-   ===================================== */
-
 function cekStatusMonitoring(idJadwal) {
+
   // Tanggal lokal Indonesia
   const sekarang = new Date();
 
@@ -500,178 +489,11 @@ function cekStatusMonitoring(idJadwal) {
     idJadwal,
     tanggal
   );
-  }
+
+
   /* =====================================
-   KONFIRMASI MENGAJAR
-   ===================================== */
-
-function konfirmasiMengajar() {
-
-  const idJadwal =
-    window.jadwalAktifId;
-
-  const idGuru =
-    guruLogin.idGuru;
-
-
-  /* ==============================
-     VALIDASI
-     ============================== */
-
-  if (!idGuru) {
-
-    tampilkanPesan(
-      "monitoringMessage",
-      "Data guru tidak ditemukan. Silakan login kembali.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if (!idJadwal) {
-
-    tampilkanPesan(
-      "monitoringMessage",
-      "Jadwal mengajar tidak ditemukan.",
-      "error"
-    );
-
-    return;
-  }
-
-
-  /* ==============================
-     TOMBOL DINONAKTIFKAN SEMENTARA
-     ============================== */
-
-  const tombol =
-    document.getElementById(
-      "btnKonfirmasi"
-    );
-
-  tombol.disabled = true;
-
-  tombol.textContent =
-    "MEMPROSES...";
-
-
-  tampilkanPesan(
-    "monitoringMessage",
-    "Sedang menyimpan konfirmasi mengajar...",
-    "success"
-  );
-
-
-  console.log(
-    "KONFIRMASI MENGAJAR:",
-    {
-      idGuru: idGuru,
-      idJadwal: idJadwal
-    }
-  );
-
-
-  /* ==============================
-     PANGGIL BACKEND
-     ============================== */
-
-  callAPI(
-    "konfirmasiMengajar",
-    {
-      idGuru: idGuru,
-      idJadwal: idJadwal
-    },
-    function(data) {
-
-      console.log(
-        "HASIL KONFIRMASI:",
-        data
-      );
-
-
-      /* ==============================
-         JIKA GAGAL
-         ============================== */
-
-      if (
-        !data ||
-        !data.success
-      ) {
-
-        tampilkanPesan(
-          "monitoringMessage",
-          data && data.message
-            ? data.message
-            : "Konfirmasi mengajar gagal.",
-          "error"
-        );
-
-
-        tombol.disabled = false;
-
-        tombol.textContent =
-          "KONFIRMASI MENGAJAR";
-
-        return;
-      }
-
-
-      /* ==============================
-         JIKA BERHASIL
-         ============================== */
-
-      let pesan =
-        data.message ||
-        "Konfirmasi mengajar berhasil.";
-
-
-      if (data.status) {
-
-        pesan +=
-          " Status: " +
-          data.status;
-
-      }
-
-
-      tampilkanPesan(
-        "monitoringMessage",
-        pesan,
-        "success"
-      );
-
-
-      /* ==============================
-         SEMBUNYIKAN TOMBOL
-         ============================== */
-
-      tombol.classList.add(
-        "hidden"
-      );
-
-
-      tombol.disabled =
-        true;
-
-
-      tombol.textContent =
-        "SUDAH DIKONFIRMASI";
-
-
-      /* ==============================
-         CEK ULANG STATUS
-         ============================== */
-
-      cekStatusMonitoring(
-        idJadwal
-      );
-
-    }
-  );
-
-}
+     PANGGIL BACKEND CEK MONITORING
+     ===================================== */
 
   callAPI(
     "cekMonitoringMengajar",
@@ -687,7 +509,10 @@ function konfirmasiMengajar() {
       );
 
 
-      // Jika server gagal
+      // ==============================
+      // JIKA SERVER GAGAL
+      // ==============================
+
       if (
         !data ||
         !data.success
@@ -760,6 +585,177 @@ function konfirmasiMengajar() {
 
     }
   );
+
+}
+
+
+/* =====================================
+   KONFIRMASI MENGAJAR
+   ===================================== */
+
+function konfirmasiMengajar() {
+
+  const idJadwal =
+    window.jadwalAktifId;
+
+  const idGuru =
+    guruLogin.idGuru;
+
+
+  // ==============================
+  // VALIDASI
+  // ==============================
+
+  if (!idGuru) {
+
+    tampilkanPesan(
+      "monitoringMessage",
+      "Data guru tidak ditemukan. Silakan login kembali.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  if (!idJadwal) {
+
+    tampilkanPesan(
+      "monitoringMessage",
+      "Jadwal mengajar tidak ditemukan.",
+      "error"
+    );
+
+    return;
+  }
+
+
+  // ==============================
+  // NONAKTIFKAN TOMBOL SEMENTARA
+  // ==============================
+
+  const tombol =
+    document.getElementById(
+      "btnKonfirmasi"
+    );
+
+  tombol.disabled = true;
+
+  tombol.textContent =
+    "MEMPROSES...";
+
+
+  tampilkanPesan(
+    "monitoringMessage",
+    "Sedang menyimpan konfirmasi mengajar...",
+    "success"
+  );
+
+
+  console.log(
+    "KONFIRMASI MENGAJAR:",
+    {
+      idGuru: idGuru,
+      idJadwal: idJadwal
+    }
+  );
+
+
+  // ==============================
+  // PANGGIL BACKEND
+  // ==============================
+
+  callAPI(
+    "konfirmasiMengajar",
+    {
+      idGuru: idGuru,
+      idJadwal: idJadwal
+    },
+    function(data) {
+
+      console.log(
+        "HASIL KONFIRMASI:",
+        data
+      );
+
+
+      // ==============================
+      // JIKA GAGAL
+      // ==============================
+
+      if (
+        !data ||
+        !data.success
+      ) {
+
+        tampilkanPesan(
+          "monitoringMessage",
+          data && data.message
+            ? data.message
+            : "Konfirmasi mengajar gagal.",
+          "error"
+        );
+
+
+        tombol.disabled = false;
+
+        tombol.textContent =
+          "KONFIRMASI MENGAJAR";
+
+        return;
+      }
+
+
+      // ==============================
+      // JIKA BERHASIL
+      // ==============================
+
+      let pesan =
+        data.message ||
+        "Konfirmasi mengajar berhasil.";
+
+
+      if (data.status) {
+
+        pesan +=
+          " Status: " +
+          data.status;
+
+      }
+
+
+      tampilkanPesan(
+        "monitoringMessage",
+        pesan,
+        "success"
+      );
+
+
+      // ==============================
+      // SEMBUNYIKAN TOMBOL
+      // ==============================
+
+      tombol.classList.add(
+        "hidden"
+      );
+
+      tombol.disabled = true;
+
+      tombol.textContent =
+        "SUDAH DIKONFIRMASI";
+
+
+      // ==============================
+      // CEK ULANG STATUS
+      // ==============================
+
+      cekStatusMonitoring(
+        idJadwal
+      );
+
+    }
+  );
+
 }
 
 /* =====================================
