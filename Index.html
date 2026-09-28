@@ -341,18 +341,7 @@ function login() {
         guruLogin.namaGuru;
 
 
-      /* ================================
-         CARI JADWAL SAAT INI
-         ================================ */
-
-      loadJadwalSaatIni();
-
-    }
-  );
-}
-
-
-/* =====================================
+   /* =====================================
    CARI JADWAL SAAT INI
    ===================================== */
 
@@ -363,6 +352,7 @@ function loadJadwalSaatIni() {
     "Mencari jadwal mengajar saat ini...",
     "success"
   );
+
 
   callAPI(
     "jadwalGuruSaatIni",
@@ -376,7 +366,15 @@ function loadJadwalSaatIni() {
         data
       );
 
-      if (!data || !data.success) {
+
+      /* ==============================
+         JIKA GAGAL
+         ============================== */
+
+      if (
+        !data ||
+        !data.success
+      ) {
 
         tampilkanPesan(
           "monitoringMessage",
@@ -415,14 +413,32 @@ function loadJadwalSaatIni() {
          ============================== */
 
       const jadwal =
-  data.jadwal[0];
+        data.jadwal[0];
 
-console.log("DETAIL JADWAL AKTIF:", jadwal);
-console.log("HARI DARI BACKEND:", data.hariSekarang);
-      
-window.jadwalAktifId =
-  jadwal.idJadwal;
 
+      console.log(
+        "DETAIL JADWAL AKTIF:",
+        jadwal
+      );
+
+
+      console.log(
+        "HARI DARI BACKEND:",
+        data.hariSekarang
+      );
+
+
+      /* ==============================
+         SIMPAN ID JADWAL AKTIF
+         ============================== */
+
+      window.jadwalAktifId =
+        jadwal.idJadwal;
+
+
+      /* ==============================
+         TAMPILKAN DATA JADWAL
+         ============================== */
 
       document
         .getElementById("hari")
@@ -451,11 +467,23 @@ window.jadwalAktifId =
 
 
       document
-  .getElementById("jam")
-  .textContent =
-  jadwal.waktu || "-";
+        .getElementById("jam")
+        .textContent =
+        jadwal.waktu || "-";
 
 
+      /* ==============================
+         CEK STATUS MONITORING
+         ============================== */
+
+      cekStatusMonitoring(
+        jadwal.idJadwal
+      );
+
+    }
+  );
+
+}
 /* =====================================
    CEK SUDAH KONFIRMASI ATAU BELUM
    ===================================== */
@@ -903,4 +931,3 @@ function tampilkanPesan(
 
 </body>
 </html>
-```
